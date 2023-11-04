@@ -15,4 +15,10 @@ theme = "anemone"
 highlight_code = true
 
 [extra]
-# Put all your custom variables here
+default_theme = "dark"
+
+[[extra.header_nav]]
+en = { name = "/home/", url = "/" }
+
+[[extra.header_nav]]
+en = { name = "/blog/", url = "/blog" }

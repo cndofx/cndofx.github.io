@@ -9,6 +9,8 @@ build_search_index = true
 
 theme = "anemone"
 
+taxonomies = [{ name = "series", feed = true }]
+
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
@@ -19,6 +21,9 @@ default_theme = "dark"
 
 [[extra.header_nav]]
 en = { name = "/home/", url = "/" }
+
+[[extra.header_nav]]
+en = { name = "/about/", url = "/about" }
 
 [[extra.header_nav]]
 en = { name = "/blog/", url = "/blog" }

@@ -7,11 +7,14 @@ date = 2023-11-29
 
 ## Introduction
 
+- [source code](https://github.com/cndofx/defenders-quest-mod-editor)
+
 I want to make a mod editor for [Defender's Quest](https://store.steampowered.com/app/218410/Defenders_Quest_Valley_of_the_Forgotten_DX_edition/).
 The game includes a mod editor already, but the UI is a mess, it's buggy,
 and it doesn't run natively on linux. More importantly, I want experience
-using godot to write non-game software and with godot in general. I'll be
-using [godot v4.1](https://docs.godotengine.org/en/4.1/).
+using godot to write non-game software and with godot in general. 
+I also just want a project I can write about. 
+I'll be using [godot v4.1](https://docs.godotengine.org/en/4.1/).
 
 ## The Plan
 
@@ -46,6 +49,14 @@ works, and maybe see how some other godot developers have implemented a level ed
 UI layout isn't particularly interesting so I don't have too much to write about,
 but I do have some progress to show and a few important points to note.
 
+- For all UI made in godot, but especially in software like this, it's important
+to make use of godot's containers and anchors to lay out the controls rather 
+than manually position controls so that everything plays nicely when the window is resized.
+MarginContainer, VBoxContainer, HBoxContainer, and GridContainer are all very commonly used.
+
+- Godot has a `application/run/low_processor_mode` property under project settings that 
+prevents the screen from being redrawn if nothing visual has changed.
+
 This is what the original mod editor looks like:
 
 ![original mod editor](original_mod_editor.png)
@@ -61,9 +72,15 @@ And this is what the scene tree currently looks like:
 Currently, only the ItemList and BattleList nodes (highlighted)
 are separated into their own scenes. They are going to have very
 similar functionality but don't share anything right now, so 
-this will be changed later.
+this will be changed later. 
 
-## not yet finished
+I'm keeping most things all in the same scene for now as I don't know
+how I'll be hooking everything up yet. Once I get to the code, I'll
+revisit my structure.
+
+## Item Editor UI
+
+todo
 
 ## Useful Resources
 

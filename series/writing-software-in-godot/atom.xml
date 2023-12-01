@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - Writing Software in Godot</title>
+    <link href="https://cndofx.github.io/series/writing-software-in-godot/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://cndofx.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-11-29T00:00:00+00:00</updated>
+    <id>https://cndofx.github.io/series/writing-software-in-godot/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Writing Software in Godot (Part 1 &#x2F; Planning and UI Layout)</title>
+        <published>2023-11-29T00:00:00+00:00</published>
+        <updated>2023-11-29T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://cndofx.github.io/blog/writing-software-in-godot-1/" type="text/html"/>
+        <id>https://cndofx.github.io/blog/writing-software-in-godot-1/</id>
+        
+        <content type="html">&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;cndofx&#x2F;defenders-quest-mod-editor&quot;&gt;source code&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;I want to make a mod editor for &lt;a href=&quot;https:&#x2F;&#x2F;store.steampowered.com&#x2F;app&#x2F;218410&#x2F;Defenders_Quest_Valley_of_the_Forgotten_DX_edition&#x2F;&quot;&gt;Defender&#x27;s Quest&lt;&#x2F;a&gt;.
+The game includes a mod editor already, but the UI is a mess, it&#x27;s buggy,
+and it doesn&#x27;t run natively on linux. More importantly, I want experience
+using godot to write non-game software and with godot in general. 
+I also just want a project I can write about. 
+I&#x27;ll be using &lt;a href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;4.1&#x2F;&quot;&gt;godot v4.1&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-plan&quot;&gt;The Plan&lt;&#x2F;h2&gt;
+&lt;p&gt;The mod editor needs to include an item editor and a map editor, along with
+the ability to read and write the XML documents that the game uses for it&#x27;s data.&lt;&#x2F;p&gt;
+&lt;p&gt;In this part, I want to get the basic UI laid out for the main page and the item editor.
+The map editor will be much more complex so I&#x27;ll worry about that later.&lt;&#x2F;p&gt;
+&lt;p&gt;In part 2, I want to write a basic XML reader and writer in GDScript. Godot
+has an &lt;a href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;stable&#x2F;classes&#x2F;class_xmlparser.html&quot;&gt;XMLParser&lt;&#x2F;a&gt;
+class built in, but it&#x27;s not very ergonomic and doesn&#x27;t do quite what I want.
+It also doesnt have support for writing XML files, so I&#x27;ll just try to come
+up with something that can do both. XML is a complex format, but the files
+I need to work with seem pretty basic, so a simple implementation shouldn&#x27;t
+be too hard.&lt;&#x2F;p&gt;
+&lt;p&gt;In part 3, I&#x27;ll get the UI functionality all hooked up and hopefully have the 
+item editor at least partially working. This part will really test my knowledge
+of godot design patterns, as there&#x27;s a lot of moving parts and a lot of state
+to manage. I plan on using &lt;a href=&quot;https:&#x2F;&#x2F;docs.godotengine.org&#x2F;en&#x2F;stable&#x2F;classes&#x2F;class_refcounted.html&quot;&gt;RefCounted&lt;&#x2F;a&gt;
+objects to store my data in memory and just having methods to convert those objects
+to and from XML, but I&#x27;ll see about that when I get there.&lt;&#x2F;p&gt;
+&lt;p&gt;After all that, I want to make a map editor, but it&#x27;s not part of the plan yet
+as I don&#x27;t know how complex it&#x27;ll be. I want to look into how
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Orama-Interactive&#x2F;Pixelorama&quot;&gt;Pixelorama&lt;&#x2F;a&gt; (a pixel sprite editor made in godot)
+works, and maybe see how some other godot developers have implemented a level editor in their games.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;main-ui&quot;&gt;Main UI&lt;&#x2F;h2&gt;
+&lt;p&gt;UI layout isn&#x27;t particularly interesting so I don&#x27;t have too much to write about,
+but I do have some progress to show and a few important points to note.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;For all UI made in godot, but especially in software like this, it&#x27;s important
+to make use of godot&#x27;s containers and anchors to lay out the controls rather 
+than manually position them so that everything plays nicely when the window is resized.
+MarginContainer, VBoxContainer, HBoxContainer, and GridContainer are all very commonly used.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Godot has a &lt;code&gt;application&#x2F;run&#x2F;low_processor_mode&lt;&#x2F;code&gt; property under project settings that 
+prevents the screen from being redrawn if nothing visual has changed.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This is what the original mod editor looks like:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;cndofx.github.io&#x2F;blog&#x2F;writing-software-in-godot-1&#x2F;original_mod_editor.png&quot; alt=&quot;original mod editor&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;This is what mine looks like:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;cndofx.github.io&#x2F;blog&#x2F;writing-software-in-godot-1&#x2F;my_mod_editor.png&quot; alt=&quot;my mod editor&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;And this is what the scene tree currently looks like:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;cndofx.github.io&#x2F;blog&#x2F;writing-software-in-godot-1&#x2F;scene_tree.png&quot; alt=&quot;godot scene tree&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Currently, only the ItemList and BattleList nodes (highlighted)
+are separated into their own scenes. They are going to have very
+similar functionality but don&#x27;t share anything right now, so 
+this will be changed later. &lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;m keeping most things all in the same scene for now as I don&#x27;t know
+how I&#x27;ll be hooking everything up yet. Once I get to the code, I&#x27;ll
+revisit my structure.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;item-editor-ui&quot;&gt;Item Editor UI&lt;&#x2F;h2&gt;
+&lt;p&gt;This is the original item editor:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;cndofx.github.io&#x2F;blog&#x2F;writing-software-in-godot-1&#x2F;original_item_editor.png&quot; alt=&quot;original item editor&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;And mine:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;cndofx.github.io&#x2F;blog&#x2F;writing-software-in-godot-1&#x2F;my_item_editor.png&quot; alt=&quot;my item editor&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s missing the &amp;quot;Item Type&amp;quot; field and also the very important &amp;quot;Special&amp;quot;
+stat editors for now, but the layout and content of those both change
+depending on their state, so they&#x27;ll have to wait until I add some code.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;problems-and-next-steps&quot;&gt;Problems and Next Steps&lt;&#x2F;h2&gt;
+&lt;p&gt;I&#x27;m happy enough with the state of the UI so far. The only real issue I see
+so far is how I&#x27;m going to implement an &amp;quot;X&amp;quot; close button on the item and battle
+editor tabs. It might also be good to put the two item and battle panes on the
+left under another tab group to free up some space, but I&#x27;m not worried about
+that yet.&lt;&#x2F;p&gt;
+&lt;p&gt;Next, I want to be able to load, edit, and save a mod. I&#x27;ll need to write a
+parser and writer for this simple XML format:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;xml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-xml &quot;&gt;&lt;code class=&quot;language-xml&quot; data-lang=&quot;xml&quot;&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;settings&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mod &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;abc&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;game &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;DQ1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;version&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;???&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_date &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;year&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;2023&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;month&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;day&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hour&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;18&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;minute&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;46&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;second&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;modified_date &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;year&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;2023&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;month&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;day&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hour&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;18&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;minute&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;46&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;second&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;title &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;aaa&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;description &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Description goes here&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;visibility &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;public&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tags &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;deluxe&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;author &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;steam &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&amp;quot;&#x2F;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;changelog &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;current&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;null&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;changelog&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;settings&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That&#x27;s all for now!&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;useful-resources&quot;&gt;Useful Resources&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=1_OFJLyqlXI&quot;&gt;Godot UI Basics&lt;&#x2F;a&gt; by Godotneers&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=sb6xe87RUE4&quot;&gt;Every Control Node Used and Explained&lt;&#x2F;a&gt; by SDG Games&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+</feed>

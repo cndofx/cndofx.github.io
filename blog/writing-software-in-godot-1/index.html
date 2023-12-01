@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="robots" content="index, follow">
+
+
+
+
+
+
+
+
+
+
+<title>Writing Software in Godot (Part 1 &#x2F; Planning and UI Layout)</title>
+
+
+
+<meta name="title" content="Writing Software in Godot (Part 1 &#x2F; Planning and UI Layout)">
+
+
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cndofx.github.io/blog/writing-software-in-godot-1/">
+
+<meta property="og:site_name" content="">
+
+
+<meta property="og:title" content="Writing Software in Godot (Part 1 &#x2F; Planning and UI Layout)">
+
+
+
+
+
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://cndofx.github.io/blog/writing-software-in-godot-1/">
+
+<meta property="twitter:title" content="Writing Software in Godot (Part 1 &#x2F; Planning and UI Layout)">
+
+
+
+
+<link rel="canonical" href="https://cndofx.github.io/blog/writing-software-in-godot-1/">
+
+
+
+
+<link rel="stylesheet" href="https://cndofx.github.io/css/style.css"/>
+
+<script src="https://cndofx.github.io/js/script.js"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        
+<nav class="navBar">
+  
+  
+  
+  <a href="https://cndofx.github.io" >&#x2F;home&#x2F;</a>
+  
+  
+  
+  
+  <a href="https://cndofx.github.io/about" >&#x2F;about&#x2F;</a>
+  
+  
+  
+  
+  <a href="https://cndofx.github.io/blog" >&#x2F;blog&#x2F;</a>
+  
+  
+
+  <div class="themeSwitch">
+    
+    <button class="themeButton dark" onclick="setTheme('dark')" title="Dark mode"><svg class="icons icons__background"><use href="https://cndofx.github.io/icons.svg#darkMode"></use></svg></button>
+    <button class="themeButton light" onclick="setTheme('light')" title="Light mode"><svg class="icons icons__background"><use href="https://cndofx.github.io/icons.svg#lightMode"></use></svg></button>
+    
+  </div>
+</nav>
+
+
+      </header>
+      <main>
+        
+<div><a href="..">..</a>/<span class="metaData">writing-software-in-godot-1</span></div>
+<time datetime="2023-11-29">Published on: <span class="metaData">2023-11-29</span></time>
+
+<h1>Writing Software in Godot (Part 1 &#x2F; Planning and UI Layout)</h1>
+
+
+
+<h2 id="introduction">Introduction</h2>
+<ul>
+<li><a href="https://github.com/cndofx/defenders-quest-mod-editor">source code</a></li>
+</ul>
+<p>I want to make a mod editor for <a href="https://store.steampowered.com/app/218410/Defenders_Quest_Valley_of_the_Forgotten_DX_edition/">Defender's Quest</a>.
+The game includes a mod editor already, but the UI is a mess, it's buggy,
+and it doesn't run natively on linux. More importantly, I want experience
+using godot to write non-game software and with godot in general. 
+I also just want a project I can write about. 
+I'll be using <a href="https://docs.godotengine.org/en/4.1/">godot v4.1</a>.</p>
+<h2 id="the-plan">The Plan</h2>
+<p>The mod editor needs to include an item editor and a map editor, along with
+the ability to read and write the XML documents that the game uses for it's data.</p>
+<p>In this part, I want to get the basic UI laid out for the main page and the item editor.
+The map editor will be much more complex so I'll worry about that later.</p>
+<p>In part 2, I want to write a basic XML reader and writer in GDScript. Godot
+has an <a href="https://docs.godotengine.org/en/stable/classes/class_xmlparser.html">XMLParser</a>
+class built in, but it's not very ergonomic and doesn't do quite what I want.
+It also doesnt have support for writing XML files, so I'll just try to come
+up with something that can do both. XML is a complex format, but the files
+I need to work with seem pretty basic, so a simple implementation shouldn't
+be too hard.</p>
+<p>In part 3, I'll get the UI functionality all hooked up and hopefully have the 
+item editor at least partially working. This part will really test my knowledge
+of godot design patterns, as there's a lot of moving parts and a lot of state
+to manage. I plan on using <a href="https://docs.godotengine.org/en/stable/classes/class_refcounted.html">RefCounted</a>
+objects to store my data in memory and just having methods to convert those objects
+to and from XML, but I'll see about that when I get there.</p>
+<p>After all that, I want to make a map editor, but it's not part of the plan yet
+as I don't know how complex it'll be. I want to look into how
+<a href="https://github.com/Orama-Interactive/Pixelorama">Pixelorama</a> (a pixel sprite editor made in godot)
+works, and maybe see how some other godot developers have implemented a level editor in their games.</p>
+<h2 id="main-ui">Main UI</h2>
+<p>UI layout isn't particularly interesting so I don't have too much to write about,
+but I do have some progress to show and a few important points to note.</p>
+<ul>
+<li>
+<p>For all UI made in godot, but especially in software like this, it's important
+to make use of godot's containers and anchors to lay out the controls rather 
+than manually position them so that everything plays nicely when the window is resized.
+MarginContainer, VBoxContainer, HBoxContainer, and GridContainer are all very commonly used.</p>
+</li>
+<li>
+<p>Godot has a <code>application/run/low_processor_mode</code> property under project settings that 
+prevents the screen from being redrawn if nothing visual has changed.</p>
+</li>
+</ul>
+<p>This is what the original mod editor looks like:</p>
+<p><img src="https://cndofx.github.io/blog/writing-software-in-godot-1/original_mod_editor.png" alt="original mod editor" /></p>
+<p>This is what mine looks like:</p>
+<p><img src="https://cndofx.github.io/blog/writing-software-in-godot-1/my_mod_editor.png" alt="my mod editor" /></p>
+<p>And this is what the scene tree currently looks like:</p>
+<p><img src="https://cndofx.github.io/blog/writing-software-in-godot-1/scene_tree.png" alt="godot scene tree" /></p>
+<p>Currently, only the ItemList and BattleList nodes (highlighted)
+are separated into their own scenes. They are going to have very
+similar functionality but don't share anything right now, so 
+this will be changed later. </p>
+<p>I'm keeping most things all in the same scene for now as I don't know
+how I'll be hooking everything up yet. Once I get to the code, I'll
+revisit my structure.</p>
+<h2 id="item-editor-ui">Item Editor UI</h2>
+<p>This is the original item editor:</p>
+<p><img src="https://cndofx.github.io/blog/writing-software-in-godot-1/original_item_editor.png" alt="original item editor" /></p>
+<p>And mine:</p>
+<p><img src="https://cndofx.github.io/blog/writing-software-in-godot-1/my_item_editor.png" alt="my item editor" /></p>
+<p>It's missing the &quot;Item Type&quot; field and also the very important &quot;Special&quot;
+stat editors for now, but the layout and content of those both change
+depending on their state, so they'll have to wait until I add some code.</p>
+<h2 id="problems-and-next-steps">Problems and Next Steps</h2>
+<p>I'm happy enough with the state of the UI so far. The only real issue I see
+so far is how I'm going to implement an &quot;X&quot; close button on the item and battle
+editor tabs. It might also be good to put the two item and battle panes on the
+left under another tab group to free up some space, but I'm not worried about
+that yet.</p>
+<p>Next, I want to be able to load, edit, and save a mod. I'll need to write a
+parser and writer for this simple XML format:</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;</span><span style="color:#bf616a;">settings</span><span>&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">mod </span><span style="color:#d08770;">id</span><span>=&quot;</span><span style="color:#a3be8c;">abc</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">game </span><span style="color:#d08770;">name</span><span>=&quot;</span><span style="color:#a3be8c;">DQ1</span><span>&quot; </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">???</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">creation_date </span><span style="color:#d08770;">year</span><span>=&quot;</span><span style="color:#a3be8c;">2023</span><span>&quot; </span><span style="color:#d08770;">month</span><span>=&quot;</span><span style="color:#a3be8c;">10</span><span>&quot; </span><span style="color:#d08770;">day</span><span>=&quot;</span><span style="color:#a3be8c;">1</span><span>&quot; </span><span style="color:#d08770;">hour</span><span>=&quot;</span><span style="color:#a3be8c;">18</span><span>&quot; </span><span style="color:#d08770;">minute</span><span>=&quot;</span><span style="color:#a3be8c;">46</span><span>&quot; </span><span style="color:#d08770;">second</span><span>=&quot;</span><span style="color:#a3be8c;">0</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">modified_date </span><span style="color:#d08770;">year</span><span>=&quot;</span><span style="color:#a3be8c;">2023</span><span>&quot; </span><span style="color:#d08770;">month</span><span>=&quot;</span><span style="color:#a3be8c;">10</span><span>&quot; </span><span style="color:#d08770;">day</span><span>=&quot;</span><span style="color:#a3be8c;">1</span><span>&quot; </span><span style="color:#d08770;">hour</span><span>=&quot;</span><span style="color:#a3be8c;">18</span><span>&quot; </span><span style="color:#d08770;">minute</span><span>=&quot;</span><span style="color:#a3be8c;">46</span><span>&quot; </span><span style="color:#d08770;">second</span><span>=&quot;</span><span style="color:#a3be8c;">0</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">title </span><span style="color:#d08770;">value</span><span>=&quot;</span><span style="color:#a3be8c;">aaa</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">description </span><span style="color:#d08770;">value</span><span>=&quot;</span><span style="color:#a3be8c;">Description goes here</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">visibility </span><span style="color:#d08770;">value</span><span>=&quot;</span><span style="color:#a3be8c;">public</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">tags </span><span style="color:#d08770;">value</span><span>=&quot;</span><span style="color:#a3be8c;">deluxe</span><span>&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">author </span><span style="color:#d08770;">id</span><span>=&quot;&quot; </span><span style="color:#d08770;">name</span><span>=&quot;&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">steam </span><span style="color:#d08770;">id</span><span>=&quot;&quot;/&gt;
+</span><span>	&lt;</span><span style="color:#bf616a;">changelog </span><span style="color:#d08770;">current</span><span>=&quot;</span><span style="color:#a3be8c;">null</span><span>&quot;&gt;
+</span><span>
+</span><span>	&lt;/</span><span style="color:#bf616a;">changelog</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">settings</span><span>&gt;
+</span></code></pre>
+<p>That's all for now!</p>
+<h2 id="useful-resources">Useful Resources</h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=1_OFJLyqlXI">Godot UI Basics</a> by Godotneers</li>
+<li><a href="https://www.youtube.com/watch?v=sb6xe87RUE4">Every Control Node Used and Explained</a> by SDG Games</li>
+</ul>
+
+
+<p class="tagsData">
+  
+</p>
+
+      </main>
+      <footer>
+        <hr>
+<div class=footContainer>
+  <div class="footLeft">
+    <p>Licensed under <a target="_blank" rel="noopener noreferrer" href="https://fr.wikipedia.org/wiki/Licence_MIT">MIT</a><br>
+      Built with <a target="_blank" rel="noopener noreferrer" href="https://www.getzola.org">Zola</a> using <a target="_blank" rel="noopener noreferrer" href="https://github.com/Speyll/anemone">anemone</a> theme &amp; <a target="_blank" rel="noopener noreferrer" href="https://github.com/Speyll/veqev">veqev</a> colors.<br>
+    </p>
+  </div>
+  
+</div>
+      </footer>
+    </div>
+  </body>
+</html>

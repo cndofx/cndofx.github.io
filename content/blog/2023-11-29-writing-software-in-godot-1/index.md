@@ -51,7 +51,7 @@ but I do have some progress to show and a few important points to note.
 
 - For all UI made in godot, but especially in software like this, it's important
 to make use of godot's containers and anchors to lay out the controls rather 
-than manually position controls so that everything plays nicely when the window is resized.
+than manually position them so that everything plays nicely when the window is resized.
 MarginContainer, VBoxContainer, HBoxContainer, and GridContainer are all very commonly used.
 
 - Godot has a `application/run/low_processor_mode` property under project settings that 
@@ -80,7 +80,48 @@ revisit my structure.
 
 ## Item Editor UI
 
-todo
+This is the original item editor:
+
+![original item editor](original_item_editor.png)
+
+And mine:
+
+![my item editor](my_item_editor.png)
+
+It's missing the "Item Type" field and also the very important "Special"
+stat editors for now, but the layout and content of those both change
+depending on their state, so they'll have to wait until I add some code.
+
+## Problems and Next Steps
+
+I'm happy enough with the state of the UI so far. The only real issue I see
+so far is how I'm going to implement an "X" close button on the item and battle
+editor tabs. It might also be good to put the two item and battle panes on the
+left under another tab group to free up some space, but I'm not worried about
+that yet.
+
+Next, I want to be able to load, edit, and save a mod. I'll need to write a
+parser and writer for this simple XML format:
+
+```xml
+<settings>
+	<mod id="abc"/>
+	<game name="DQ1" version="???"/>
+	<creation_date year="2023" month="10" day="1" hour="18" minute="46" second="0"/>
+	<modified_date year="2023" month="10" day="1" hour="18" minute="46" second="0"/>
+	<title value="aaa"/>
+	<description value="Description goes here"/>
+	<visibility value="public"/>
+	<tags value="deluxe"/>
+	<author id="" name=""/>
+	<steam id=""/>
+	<changelog current="null">
+
+	</changelog>
+</settings>
+```
+
+That's all for now!
 
 ## Useful Resources
 
